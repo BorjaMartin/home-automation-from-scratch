@@ -27,6 +27,7 @@ Fundamentos de domótica, protocolos y comparativa de plataformas.
 - [Protocolos domóticos](./01-introduccion/02-protocolos-domoticos.md)
 - [Home Assistant vs otras opciones](./01-introduccion/03-home-assistant-vs-otras-opciones.md)
 - [Ruta de aprendizaje](./01-introduccion/04-ruta-de-aprendizaje.md)
+- [Documentación para principiantes](./01-introduccion/05-documentación-para-principiantes.md)
 
 ### [💻 02 - Servidor Local](./02-servidor-local/)
 Prepara tu PC viejo como servidor domótico.
