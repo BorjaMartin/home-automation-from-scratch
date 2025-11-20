@@ -24,7 +24,7 @@ jobs:
       - name: Obtener todas las ramas
         run: |
           git fetch --all
-          git branch -r | grep -v '\->' | grep -v 'master' | sed 's/origin\///' > branches.txt
+          git branch -r | grep -v '\->' | grep -v 'master' | sed 's/origin\///' | xargs -n1 | grep -v '^$' > branches.txt
           echo "Ramas encontradas:"
           cat branches.txt
       
@@ -32,6 +32,9 @@ jobs:
         run: |
           # Leer cada rama y intentar sincronizarla
           while IFS= read -r branch; do
+            # Eliminar espacios en blanco al inicio y final
+            branch=$(echo "$branch" | xargs)
+            
             if [ ! -z "$branch" ]; then
               echo "=========================================="
               echo "Procesando rama: $branch"
