@@ -1,0 +1,71 @@
+name: Sincronizar Ramas con Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync-branches:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Obtener todo el historial
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Obtener todas las ramas
+        run: |
+          git fetch --all
+          git branch -r | grep -v '\->' | grep -v 'master' | sed 's/origin\///' > branches.txt
+          echo "Ramas encontradas:"
+          cat branches.txt
+      
+      - name: Sincronizar ramas
+        run: |
+          # Leer cada rama y intentar sincronizarla
+          while IFS= read -r branch; do
+            if [ ! -z "$branch" ]; then
+              echo "=========================================="
+              echo "Procesando rama: $branch"
+              echo "=========================================="
+              
+              # Checkout a la rama
+              git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/$branch"
+              
+              # Intentar merge con master
+              if git merge origin/master --no-edit; then
+                echo "✓ Merge exitoso en $branch"
+                
+                # Push de los cambios
+                if git push origin "$branch"; then
+                  echo "✓ Push exitoso a $branch"
+                else
+                  echo "✗ Error al hacer push a $branch"
+                fi
+              else
+                echo "✗ Conflicto detectado en $branch - omitiendo"
+                echo "⚠️  La rama $branch requiere resolución manual de conflictos"
+                git merge --abort
+              fi
+              
+              echo ""
+            fi
+          done < branches.txt
+      
+      - name: Resumen
+        if: always()
+        run: |
+          echo "=========================================="
+          echo "Sincronización completada"
+          echo "=========================================="
+          echo "Revisa los logs anteriores para ver qué ramas se sincronizaron exitosamente"
+          echo "Las ramas con conflictos requieren resolución manual"
+
